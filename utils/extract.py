@@ -1,6 +1,5 @@
 import time
 import requests
-import pandas as pd
 from bs4 import BeautifulSoup
 
 # Menambahkan header untuk menghindari blokir oleh server
@@ -14,14 +13,15 @@ HEADERS = {
 
 def fetching_content(url):
     """Mengambil konten dari URL yang diberikan."""
-    session = requests.Session()
-    response = session.get(url, headers=HEADERS)
     try:
+        session = requests.Session()
+        response = session.get(url, headers=HEADERS)
         response.raise_for_status()  # Memeriksa apakah permintaan berhasil
+        
         return response.content
+    
     except requests.exceptions.RequestException as e:
-        print(f"Unexpected error fetching content from {url}: {type(e).__name__} - {e}")
-
+        raise Exception(f"Unexpected error fetching content from {url}: {type(e).__name__} - {e}")
 
 def extract_product_data(collection_card):
     """Mengambil data product berupa : 
@@ -71,14 +71,14 @@ def extract_product_data(collection_card):
             'Size': size,
             'Gender': gender
         }
-
+        
         return products
 
     except AttributeError as e:
-        print(f'HTML Structure Changed: {e}')
+        raise AttributeError(f'HTML Structure Changed: {e}')
 
     except Exception as e:
-        print(f'Unexpected error extracting product data: {type(e).__name__} - {e}')
+        raise Exception(f'Unexpected error extracting product data: {type(e).__name__} - {e}')
 
 
 def scrape_product(base_url, start_page=1, delay=2):
@@ -112,14 +112,14 @@ def scrape_product(base_url, start_page=1, delay=2):
             else:
                 break # Berhenti jika tidak ada kesalahan
     
+        return data
+
     except requests.exceptions.RequestException as e:
-        print(f'Network error on page {page_number}: {e}')
+        raise Exception(f'Network error on page {page_number}: {e}')
     
     except Exception as e:
-        print(f'Unexpected error while scraping page {page_number}: {type(e).__name__} - {e}')
+        raise Exception(f'Unexpected error while scraping page {page_number}: {type(e).__name__} - {e}')
     
-    return data
-
 
 def collect_product():
     """Fungsi utama untuk keseluruhan proses scraping hingga menyimpannya."""
@@ -128,11 +128,13 @@ def collect_product():
     try:
         # Menjalankan proses scraping
         all_products_data = scrape_product(BASE_URL)
+
+        return all_products_data
     
     except KeyboardInterrupt:
-        print('Scraping process interrupted by the user. Exiting')
+        raise KeyboardInterrupt('Scraping process interrupted by the user. Exiting')
 
     except Exception as e:
-        print(f'Unexpected error in collect_product: {type(e).__name__} - {e}')
+        raise Exception(f'Unexpected error in collect_product: {type(e).__name__} - {e}')
 
-    return all_products_data
+   

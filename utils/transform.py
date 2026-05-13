@@ -4,14 +4,15 @@ def transform_to_Dataframe(data):
     """Mengubah data yang sudah diekstrak menjadi DataFrame."""
     try:
         df = pd.DataFrame(data)
+
+        return df
     
     except ValueError as e:
-        print(f'Error dalam mengubah data ke DataFrame: {e}')
-    except Exception as e:
-        print(f'Unexpected error in transform_to_Dataframe: {type(e).__name__} - {e}')
+        raise ValueError(f'Error dalam mengubah data ke DataFrame: {e}')
     
-    return df
-
+    except Exception as e:
+        raise Exception(f'Unexpected error in transform_to_Dataframe: {type(e).__name__} - {e}')
+    
 
 def transform_data(data, exchange_rate):
 
@@ -24,7 +25,7 @@ def transform_data(data, exchange_rate):
             # Mengubah ke numerik, jika ada nilai yang tidak bisa diubah, akan menjadi NaN
             data['Price_in_dollars'] = pd.to_numeric(clean_price, errors='coerce')
             # Transformasi ke Rupiah
-            data['Price_IDR'] = data['Price_in_dollars'] * float(exchange_rate)
+            data['Price'] = data['Price_in_dollars'] * float(exchange_rate)
     
         # Transformasi Rating
         if 'Rating' in data.columns:
@@ -52,17 +53,20 @@ def transform_data(data, exchange_rate):
         # Menambahkan Timestamp
         data['Timestamp'] = pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    except KeyError as e:
-        print(f'Kolom yang diperlukan tidak ditemukan: {e}')    
-    except ValueError as e:
-        print(f'Error dalam mengubah tipe data: {e}')
-    except TypeError as e:
-        print(f'Error dalam memproses data: {e}')
-    except Exception as e:
-        print(f'Unexpected error transforming data: {type(e).__name__} - {e}')
-    
-    return data
+        return data
 
+    except KeyError as e:
+        raise KeyError(f'Kolom yang diperlukan tidak ditemukan: {e}')    
+    
+    except ValueError as e:
+        raise ValueError(f'Error dalam mengubah tipe data: {e}')
+    
+    except TypeError as e:
+        raise TypeError(f'Error dalam memproses data: {e}')
+    
+    except Exception as e:
+        raise Exception(f'Unexpected error transforming data: {type(e).__name__} - {e}')
+    
 
 def clean_data(data):
     """Membersihkan data dari nilai yang tidak valid atau duplikat."""
@@ -77,15 +81,18 @@ def clean_data(data):
         data = data[data['Gender'] != "GENDER"]
 
         # Menghapus kolom Price_in_dollars dan Price
-        data = data.drop(columns=['Price_in_dollars', 'Price'], errors='ignore')
+        data = data.drop(columns='Price_in_dollars', errors='ignore')
 
         # Menghapus duplikat berdasarkan Title
         data = data.drop_duplicates(subset=['Title'])
     
-    except KeyError as e:
-        print(f"Structural Error: Column {e} not found during the cleaning process.")
-    except Exception as e:
-        print(f"Unexpected Error clean_data: {e}")
+        return data
 
-    return data
+    except KeyError as e:
+        raise KeyError(f"Structural Error: Column {e} not found during the cleaning process.")
+    
+    except Exception as e:
+        raise Exception(f"Unexpected Error clean_data: {e}")
+
+    
 
